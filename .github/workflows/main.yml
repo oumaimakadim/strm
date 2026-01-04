@@ -1,0 +1,28 @@
+name: Record Flosssi Live
+on:
+  schedule:
+    - cron: '*/5 * * * *' # كيتشيك كل 15 دقيقة
+  workflow_dispatch: # تقدر تخدمو بيدك وقتما بغيتي
+
+jobs:
+  record_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install yt-dlp
+        run: |
+          sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+          sudo chmod a+rx /usr/local/bin/yt-dlp
+
+      - name: Check and Record
+        run: |
+          # هاد الأمر كيسجل اللايف بجودة 720p باش ما يجيش الحجم كبير بزاف ويحبس ليك GitHub
+          # كيسجل فقط إلا كان كاين لايف "Live" دابا
+          yt-dlp -f "best[height<=720]" --live-from-start --wait-for-video 10 -o "flosssi_live.mp4" "https://www.youtube.com/@flosssi/live"
+        timeout-minutes: 350 # غيحبس مورا تقريبا 6 سوايع (هذا قانون GitHub)
+
+      - name: Upload Video
+        uses: actions/upload-artifact@v4
+        with:
+          name: flosssi-recorded-video
+          path: flosssi_live.mp4
+          retention-days: 1 # غيبقى السجل يوم واحد باش ما يعمرش ليك الحساب
